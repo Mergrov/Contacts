@@ -29,7 +29,6 @@ class Organization : Contact() {
     override var editedDate: String = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
 }
 
-
 val contactList = mutableListOf<Contact>()
 
 fun add() {
@@ -48,6 +47,85 @@ fun list() {
             println("${counter}. ${element.name}")
         }
         counter++
+    }
+    println("\nEnter action ([number], back): ")
+    val input = readln()
+    when(input){
+        "back" -> main()
+        else -> {
+            println("\n")
+            val recordIndex = input.toInt() - 1
+            if (contactList[recordIndex] is Person) {
+                val person = contactList[recordIndex] as Person
+                println("Name: ${person.name}\nSurname: ${person.surname}\n" +
+                        "Birth date: ${person.dob}\nGender: ${person.gender}\n" +
+                        "Number: ${person.number}\nTime created: ${person.createdDate}\nTime last edit: ${person.editedDate}")
+            }
+            if (contactList[recordIndex] is Organization) {
+                val organization = contactList[recordIndex] as Organization
+                println("Organization name: ${organization.name}\nAddress: ${organization.address}\nNumber: ${organization.number}\n" +
+                        "Time created: ${organization.createdDate}\nTime last edit: ${organization.editedDate}")
+            }
+            println("\nEnter action (edit, delete, menu): ")
+            when(readln()){
+                "edit" -> {
+                    if (contactList[recordIndex] is Person) {
+                        val person = contactList[recordIndex] as Person
+                        println("Select a field (name, surname, birth, gender, number) : ")
+                        val editedField = readln()
+                        when (editedField) {
+                            "name" -> {
+                                println("Enter name: ")
+                                person.name = readln()
+                                person.editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+                            "gender" -> {
+                                println("Enter gender: ")
+                                person.gender = genderBlender(readln())
+                                person.editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+
+                            "surname" -> {
+                                println("Enter surname: ")
+                                person.surname = readln()
+                                contactList[recordIndex].editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+
+                            "number" -> {
+                                println("enter number: ")
+                                val newNumber = numberChecker(readln())
+                                person.number = newNumber
+                                contactList[recordIndex].editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+                        }
+                    }
+                    if (contactList[recordIndex] is Organization) {
+                        val organization = contactList[recordIndex] as Organization
+                        println("Select a field (address, number): ")
+                        when (readln()) {
+                            "address" -> {
+                                println("Enter address: ")
+                                organization.address = readln()
+                                contactList[recordIndex].editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+                            "number" -> { println("Enter number: ")
+                                val newNumber = numberChecker(readln())
+                                organization.number = newNumber
+                                contactList[recordIndex].editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+
+                        }
+                    }
+
+                }
+                "delete" -> {
+                    contactList.removeAt(recordIndex)
+                }
+                "menu" -> main()
+            }
+
+
+        }
     }
 }
 
@@ -156,7 +234,7 @@ fun edit() {
                 }
 
                 "number" -> {
-                    println("enter number: ");
+                    println("enter number: ")
                     val newNumber = numberChecker(readln())
                     person.number = newNumber
                     contactList[index].editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
@@ -190,17 +268,136 @@ fun info(){
     list()
     println("Enter index to show info: ")
     val index = readln().toInt() - 1
-    if (contactList[index] is Person){
+    if (contactList[index] is Person) {
         val person = contactList[index] as Person
         println("Name: ${person.name}\nSurname: ${person.surname}\n" +
                 "Birth date: ${person.dob}\nGender: ${person.gender}\n" +
                 "Number: ${person.number}\nTime created: ${person.createdDate}\nTime last edit: ${person.editedDate}")
     }
-    if (contactList[index] is Organization){
+    if (contactList[index] is Organization) {
         val organization = contactList[index] as Organization
         println("Organization name: ${organization.name}\nAddress: ${organization.address}\nNumber: ${organization.number}\n" +
                 "Time created: ${organization.createdDate}\nTime last edit: ${organization.editedDate}")
     }
+}
+
+fun search() {
+    fun again() {
+        println("\n")
+        search()
+    }
+    fun back() {
+        println("\n")
+        main()
+    }
+
+    println("Enter search query: ")
+    val input = readln()
+    var counter = 1
+    val matchingIndecies = mutableListOf<Int>()
+    for (element in contactList){
+        if (element is Person){
+            if (element.surname.lowercase().contains(input) || element.name.lowercase().contains(input) || element.number.contains(input)){
+                matchingIndecies.add(contactList.indexOf(element))
+            }
+        }
+        if(element is Organization){
+        if (element.name.lowercase().contains(input) || element.number.contains(input)) {
+            matchingIndecies.add(contactList.indexOf(element))
+        }
+        }
+    }
+    println("Found ${matchingIndecies.size} results: ")
+    for (index in matchingIndecies) {
+        if (contactList[index] is Organization)
+        println("$counter. ${contactList[index].name}")
+        counter++
+        if (contactList[index] is Person) {
+            val person2 = contactList[index] as Person
+            println("$counter. ${contactList[index].name} ${person2.surname}")
+            counter++
+        }
+    }
+    println("\nEnter action ([number], back, again): ")
+    val input2 = readln()
+    when(input2){
+        "again" -> again()
+        "back" -> back()
+        else -> {
+            println("\n")
+            val recordIndex = input2.toInt() - 1
+            if (contactList[recordIndex] is Person) {
+                val person = contactList[recordIndex] as Person
+                println("Name: ${person.name}\nSurname: ${person.surname}\n" +
+                        "Birth date: ${person.dob}\nGender: ${person.gender}\n" +
+                        "Number: ${person.number}\nTime created: ${person.createdDate}\nTime last edit: ${person.editedDate}")
+            }
+            if (contactList[recordIndex] is Organization) {
+                val organization = contactList[recordIndex] as Organization
+                println("Organization name: ${organization.name}\nAddress: ${organization.address}\nNumber: ${organization.number}\n" +
+                        "Time created: ${organization.createdDate}\nTime last edit: ${organization.editedDate}")
+            }
+            println("\nEnter action (edit, delete, menu): ")
+            when(readln()){
+                "edit" -> {
+                    if (contactList[recordIndex] is Person) {
+                        val person = contactList[recordIndex] as Person
+                        println("Select a field (name, surname, birth, gender, number) : ")
+                        val editedField = readln()
+                        when (editedField) {
+                            "name" -> {
+                                println("Enter name: ")
+                                person.name = readln()
+                                person.editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+                            "gender" -> {
+                                println("Enter gender: ")
+                                person.gender = genderBlender(readln())
+                                person.editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+
+                            "surname" -> {
+                                println("Enter surname: ")
+                                person.surname = readln()
+                                contactList[recordIndex].editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+
+                            "number" -> {
+                                println("enter number: ")
+                                val newNumber = numberChecker(readln())
+                                person.number = newNumber
+                                contactList[recordIndex].editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+                        }
+                    }
+                    if (contactList[recordIndex] is Organization) {
+                        val organization = contactList[recordIndex] as Organization
+                        println("Select a field (address, number): ")
+                        when (readln()) {
+                            "address" -> {
+                                println("Enter address: ")
+                                organization.address = readln()
+                                contactList[recordIndex].editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+                            "number" -> { println("Enter number: ")
+                                val newNumber = numberChecker(readln())
+                                organization.number = newNumber
+                                contactList[recordIndex].editedDate = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME).toString()
+                            }
+
+                        }
+                    }
+
+                }
+                "delete" -> {
+                    contactList.removeAt(recordIndex)
+                }
+                "menu" -> main()
+            }
+
+        }
+    }
+
 }
 
 fun exit() {
@@ -213,7 +410,8 @@ fun decisionMaker(input: String) {
         "remove" -> remove()
         "edit" -> edit()
         "count" -> count()
-        "info" -> info()
+        "list" -> list()
+        "search" -> search()
         "exit" -> exit()
 
     }
@@ -223,13 +421,12 @@ fun main() {
     var firstIteration = true
     while (true) {
         if (firstIteration) {
-            println("Enter action (add, remove, edit, count, info, exit):")
+            println("Enter action (add, remove, edit, count, list, exit):")
             decisionMaker(readln())
             firstIteration = false
         } else {
-            println("\nEnter action (add, remove, edit, count, info, exit):")
+            println("\nEnter action (add, remove, edit, count, list, exit):")
             decisionMaker(readln())
         }
     }
 }
-
